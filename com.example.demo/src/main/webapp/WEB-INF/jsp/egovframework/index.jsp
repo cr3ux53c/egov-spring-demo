@@ -98,7 +98,8 @@
 
 
 	<!-- Start callto-action-area Area -->
-	<section class="callto-action-area section-gap" id="contact">
+	<section class="callto-action-area section-gap" id="contact"
+		style="padding: 10px">
 		<div class="container">
 			<div class="row justify-content-center">
 				<div class="col-lg-9">
@@ -120,33 +121,22 @@
 						<div style="width: 100%; height: 545px;" id="map"></div>
 					</div>
 					<div class="col-lg-7 contact-center" align="center">
-						<form name="myForm" action="index.do" class="contact-form text-right">
-							<input type="text" name="text" id="text1">
-							<input type=submit class="primary-btn mt-20" onclick="func_confirm(myForm)">
+						<form name="myForm" action="index.do"
+							class="contact-form text-right">
+							<input class="form-control" type="text" name="text" id="text1">&nbsp;&nbsp;
+							<input type='submit' id="search" class="primary-btn mt-20">
 						</form>
-						
-						<form action="index.do">
-							<c:forEach items="${key}" var="data">
-								<input type="submit" name=text value="${data.searchText}">${data.searchDate}<BR>
-							</c:forEach>
+						<form id="list" action="index.do" align="center">
+							<%-- 							<c:forEach items="${key}" var="data"> --%>
+							<%-- 								<input class="btn btn-default" type="submit" name=text value="${data.searchText}"> --%>
+							<%-- 								&nbsp;&nbsp;${data.searchDate}<BR> --%>
+							<%-- 							</c:forEach> --%>
 						</form>
 					</div>
 				</div>
 			</div>
 		</div>
 	</section>
-	<!--			<section class="contact-area">
-				<div class="container">
-					<div class="contact-section">
-						<div class="row align-items-center">
-							<div class="col-lg-4 contact-left">
-								<div style="width:100%;height:300px;" id="roadview"></div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>-->
-	<!-- End contact Area -->
 
 
 	<!-- start footer Area -->
@@ -226,11 +216,73 @@
 	<script type="text/javascript"
 		src="//dapi.kakao.com/v2/maps/sdk.js?appkey=a27411d7f467e9470b9d2986a60599b0&libraries=services"></script>
 	<script>
-		var Location;
-		function func_confirm(form) {
-			Location = form.text1.value;
-			ps.keywordSearch(Location, placesSearchCB);
+		function dateToYYYYMMDD(date) {
+			function pad(num) {
+				num = num + '';
+				return num.length < 2 ? '0' + num : num;
+			}
+			return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-'
+					+ pad(date.getDate()) + ', ' + date.getHours() + ':'
+					+ date.getMinutes();
 		}
+
+		function getList() {
+			$
+					.ajax({
+						url : "select.do",
+						data : {},
+						success : function(res) {
+							var html = '';
+							for (var i = 0; i < res.length; i++) {
+								html += '<input class="btn btn-default" type="submit" name="area" value="' + res[i].searchText + '">';
+								var date = new Date(res[i].searchDate);
+								html += '&nbsp;&nbsp;' + dateToYYYYMMDD(date)
+										+ '<br>';
+							}
+
+							$('#list').html(html);
+
+						}
+					})
+		}
+		getList();
+
+		$(document).on('click', 'input[name=area]', function() {
+			var area = $(this).val();
+			$.ajax({
+				url : "insert.do",
+				data : {
+					'text' : area
+				},
+				success : function(res) {
+					getList();
+					Location = area;
+					ps.keywordSearch(Location, placesSearchCB);
+				}
+			})
+
+			return false;
+		});
+
+		var Location;
+		$('#search').click(function() {
+			Location = $('input[name=text]').val();
+			ps.keywordSearch(Location, placesSearchCB);
+
+			$.ajax({
+				url : "insert.do",
+				data : {
+					'text' : $('input[name=text]').val()
+				},
+				success : function(res) {
+					getList();
+				}
+			})
+
+			return false;
+
+		});
+
 		// 마커를 클릭하면 장소명을 표출할 인포윈도우 입니다
 		var infowindow = new daum.maps.InfoWindow({
 			zIndex : 1
