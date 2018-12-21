@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.dao.SearchDAO;
+import com.example.demo.vo.SearchVO;
 
 @Controller
 public class BasicController {
@@ -21,7 +22,9 @@ public class BasicController {
 	@RequestMapping("search.do")
 	public String search(@RequestParam("text") String text) {
 		searchDAO.insertSearch(text);
-
+		SearchVO searchVO = searchDAO.selectSearch();
+		
+		
 		return "view_result";
 	}
 
