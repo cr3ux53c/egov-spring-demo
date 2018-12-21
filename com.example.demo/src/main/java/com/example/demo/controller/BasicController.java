@@ -1,7 +1,11 @@
 package com.example.demo.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -20,11 +24,11 @@ public class BasicController {
 	}
 
 	@RequestMapping("search.do")
-	public String search(@RequestParam("text") String text) {
+	public String search(@RequestParam("text") String text, Model model) {
 		searchDAO.insertSearch(text);
-		SearchVO searchVO = searchDAO.selectSearch();
+		List<SearchVO> list = searchDAO.selectSearch();
 		
-		
+		model.addAttribute("key", list);
 		return "view_result";
 	}
 
